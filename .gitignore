@@ -1,0 +1,10 @@
+secrets/
+.env*
+*.pem
+*.key
+*.sqlite*
+__pycache__/
+*.pyc
+*credentials*.json
+google.json
+noon.json

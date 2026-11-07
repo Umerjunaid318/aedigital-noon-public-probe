@@ -1,0 +1,35 @@
+name: Public Noon access test
+on:
+  workflow_dispatch:
+    inputs:
+      seller:
+        description: Public seller code
+        required: true
+        default: p-98333
+        type: string
+      sku:
+        description: Public canonical product SKU
+        required: true
+        default: N70376247V
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: public-noon-access-test
+  cancel-in-progress: false
+jobs:
+  public-source-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out public test code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run offline parser tests
+        run: python3 -m unittest -q test_probe.py
+      - name: Verify public canonical offer and catalog access
+        env:
+          PUBLIC_SELLER: ${{ inputs.seller }}
+          PUBLIC_SKU: ${{ inputs.sku }}
+        run: python3 -u probe.py
