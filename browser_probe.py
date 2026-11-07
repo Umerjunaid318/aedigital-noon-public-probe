@@ -1,4 +1,4 @@
-"""Ordinary Chromium, original HTML only. No page scripts, credentials or bypass."""
+"""Ordinary Chromium with normal page rendering. No credentials or security bypass."""
 import os,re,time,json
 from datetime import datetime,timezone
 from playwright.sync_api import sync_playwright
@@ -19,19 +19,22 @@ class BrowserHTTP:
         time.sleep(max(0,self.next-time.monotonic()));self.next=time.monotonic()+.5
         page=self.context.new_page()
         try:
-            response=page.goto(url,wait_until='commit',timeout=45000)
+            response=page.goto(url,wait_until='domcontentloaded',timeout=45000)
             if response is None:raise SourceError('No document response')
             if response.status in (401,403,429):self.stopped=True;raise SourceError('Source HTTP '+str(response.status)+'; no retry')
             if response.status!=200:raise SourceError('Source HTTP '+str(response.status))
             if not response.url.startswith('https://www.noon.com/uae-en/'):raise SourceError('Unexpected redirect')
-            body=response.body()
+            page.locator('body').wait_for(state='visible',timeout=15000)
+            body=page.content().encode('utf-8')
             if len(body)>8*1024*1024:raise SourceError('Response too large')
             text=body.decode('utf-8');title=re.search(r'<title[^>]*>(.*?)</title>',text,re.I|re.S)
             if (title and re.search(r'verify.*human|checking your browser|just a moment|access denied|captcha',title[1],re.I)) or (len(text)<50000 and re.search(r'verify you are human|px-captcha|cdn-cgi/challenge-platform|captcha-delivery\.com',text,re.I)):
                 self.stopped=True;raise SourceError('Verification response; no bypass')
             return text
         except SourceError:raise
-        except Exception as exc:raise SourceError('Browser request failed: '+type(exc).__name__) from None
+        except Exception as exc:
+            code=re.search(r'net::ERR_[A-Z_]+',str(exc))
+            raise SourceError('Browser request failed: '+type(exc).__name__+((' '+code.group(0)) if code else '')) from None
         finally:page.close()
 
 def main():
@@ -39,10 +42,9 @@ def main():
     with sync_playwright() as p:
         browser=p.chromium.launch(headless=True)
         try:
-            context=browser.new_context(java_script_enabled=False,service_workers='block')
-            context.route('**/*',lambda route:route.continue_() if route.request.resource_type=='document' else route.abort())
+            context=browser.new_context(java_script_enabled=True)
             http=BrowserHTTP(context)
-            print('BROWSER_TEST_STARTED: Standard Chromium; original HTML only; no page JavaScript, keys, login or Sheet writes.',flush=True)
+            print('BROWSER_TEST_STARTED: Standard Chromium; normal JavaScript and resources; no keys, login, security changes or Sheet writes.',flush=True)
             html=http.get('https://www.noon.com/uae-en/'+sku+'/p/')
             print('DOCUMENT_RECEIVED:',len(html),'characters',flush=True)
             product=extract(html,'product');result=primary(product,sku,seller)
