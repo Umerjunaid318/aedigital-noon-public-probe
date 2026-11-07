@@ -21,3 +21,10 @@ The test first matches the canonical product's explicit default offer to one act
 To test locally: `python3 -m unittest -q test_probe.py`. No external dependencies or credentials are required for offline tests.
 
 Do not upload keys or private data here. A standard public runner is the intended free test environment; larger/paid runners are not used.
+
+## First hosted test result
+
+On 7 November 2026, the standard GitHub Linux runner passed all six offline tests, but the first canonical public product request timed out after approximately 30 seconds. No valid live source data was obtained. Full catalog access was not reached. Recurring monitoring remains disabled and no Google key was requested or installed.
+
+Run: https://github.com/Umerjunaid318/aedigital-noon-public-probe/actions/runs/42380089691
+
