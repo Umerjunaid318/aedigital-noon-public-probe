@@ -1,0 +1,20 @@
+name: Windows installed Chrome source check
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['windows_chrome_probe.py', '.github/workflows/windows-chrome.yml']
+permissions:
+  contents: read
+jobs:
+  chrome:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install official browser control package
+        run: python -m pip install playwright==1.64.1
+      - name: Check canonical page with installed Chrome
+        run: python -u windows_chrome_probe.py
