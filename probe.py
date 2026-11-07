@@ -47,7 +47,7 @@ def primary(p,sku,seller):
         if o.get('partner_code') not in seen:alternatives.append(compact(o));seen.add(o['partner_code'])
     return {'winner':winner,'our_bb':winner['seller_id']==seller,'alternatives':alternatives[:2]}
 
-def catalog(http,seller):
+def catalog(http,seller,executor=ThreadPoolExecutor):
     base='https://www.noon.com/uae-en/'+seller+'/'
     first=http.get(base+'?limit=50&page=1');total=extract(first,'nbHits');pages=extract(first,'nbPages')
     if isinstance(total,bool) or not isinstance(total,int) or not 1<=total<=5000:raise SourceError('Invalid public catalog count')
@@ -69,13 +69,13 @@ def catalog(http,seller):
         codes=[x.get('code') for f in facets if isinstance(f,dict) and f.get('code')=='brand' for x in f.get('data',[]) if isinstance(x,dict)]
         if not codes or any(not isinstance(c,str) or not re.fullmatch(r'[a-z0-9_-]+',c) for c in codes):raise SourceError('Invalid brand navigation')
         urls=[(c,base+c+'/') for c in dict.fromkeys(codes)]
-        with ThreadPoolExecutor(max_workers=4) as pool:
+        with executor(max_workers=4) as pool:
             for (brand,url),html in zip(urls,pool.map(http.get,[u+'?limit=50&page=1' for _,u in urls])):
                 count=extract(html,'nbHits');n=extract(html,'nbPages')
                 if isinstance(count,bool) or not isinstance(count,int) or not 0<=count<=500 or isinstance(n,bool) or not isinstance(n,int) or not 0<=n<=10:raise SourceError('Unsupported brand partition')
                 accept(html,brand);jobs.extend((url+f'?limit=50&page={page}',brand) for page in range(2,max(n,(count+49)//50)+1))
     else:jobs=[(base+f'?limit=50&page={page}',None) for page in range(2,max(pages,(total+49)//50)+1)]
-    with ThreadPoolExecutor(max_workers=4) as pool:
+    with executor(max_workers=4) as pool:
         for (_,brand),html in zip(jobs,pool.map(http.get,[u for u,_ in jobs])):accept(html,brand)
     if len(store_names)!=1:raise SourceError('Ambiguous storefront display identity')
     info={'reported_offers':total,'distinct_offers':len(offer_ids),'distinct_skus':len(records),'store':next(iter(store_names))}

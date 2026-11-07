@@ -1,0 +1,29 @@
+name: Standard Chromium public test
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/browser-probe.yml'
+      - 'browser_probe.py'
+permissions:
+  contents: read
+concurrency:
+  group: public-noon-browser-test
+  cancel-in-progress: false
+jobs:
+  chromium-source-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run offline parser tests
+        run: python3 -m unittest -q test_probe.py
+      - name: Install official Chromium tooling
+        run: |
+          python3 -m pip install playwright==1.64.1
+          python3 -m playwright install --with-deps chromium
+      - name: Check original public documents using standard Chromium
+        run: python3 -u browser_probe.py

@@ -2,7 +2,7 @@
 
 This repository tests **public data access only** from a standard Linux GitHub Actions runner. It is not the finished monitoring system.
 
-- Manual `workflow_dispatch` only: no push trigger or recurring schedule.
+- No recurring schedule. The HTTP test is manual; the standard-Chromium test also runs once when its code/workflow changes on main.
 - No Google credentials, spreadsheet identifiers, private inventory or customer data.
 - No Noon API keys, account login, browser JavaScript, CAPTCHA handling, proxy switching, disabled certificate checks or seller-forcing URL parameters.
 - No Google Sheets, price, stock or marketplace writes.
@@ -28,3 +28,6 @@ On 7 November 2026, the standard GitHub Linux runner passed all six offline test
 
 Run: https://github.com/Umerjunaid318/aedigital-noon-public-probe/actions/runs/42380089691
 
+## Standard Chromium test
+
+The second source test uses ordinary headless Chromium with JavaScript disabled. It parses only the original document response. No credentials, profiles, fingerprint modifications, network switching, challenge bypass or Sheets writes are used. The workflow uses the official Playwright package/browser installer on a standard public Linux runner. A valid canonical offer and complete catalog must both pass before this approach is accepted.
