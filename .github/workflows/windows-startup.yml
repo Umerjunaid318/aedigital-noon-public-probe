@@ -1,0 +1,18 @@
+name: Windows startup regression
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['windows_tasks.py', 'test_windows_startup.py', '.github/workflows/windows-startup.yml']
+permissions:
+  contents: read
+jobs:
+  startup:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Reproduce old failure and verify corrected task handling
+        run: python -m unittest -v test_windows_startup.py
