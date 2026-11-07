@@ -31,3 +31,8 @@ Run: https://github.com/Umerjunaid318/aedigital-noon-public-probe/actions/runs/4
 ## Standard Chromium test
 
 The second source test uses ordinary headless Chromium with JavaScript disabled. It parses only the original document response. No credentials, profiles, fingerprint modifications, network switching, challenge bypass or Sheets writes are used. The workflow uses the official Playwright package/browser installer on a standard public Linux runner. A valid canonical offer and complete catalog must both pass before this approach is accepted.
+
+### Standard Chromium result
+
+The standard GitHub-hosted Chromium test did not obtain a valid document. The browser navigation failed before product parsing. This does not establish a specific bot block or its cause. Both hosted approaches remain unverified for live collection; no recurring schedule or Google connection has been enabled.
+Run: https://github.com/Umerjunaid318/aedigital-noon-public-probe/actions/runs/42381115186
