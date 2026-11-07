@@ -33,18 +33,18 @@ class BrowserHTTP:
             return text
         except SourceError:raise
         except Exception as exc:
-            code=re.search(r'net::ERR_[A-Z_]+',str(exc))
+            code=re.search(r'net::ERR_[A-Z0-9_]+',str(exc))
             raise SourceError('Browser request failed: '+type(exc).__name__+((' '+code.group(0)) if code else '')) from None
         finally:page.close()
 
 def main():
     seller='p-98333';sku='N70376247V';started=time.monotonic()
     with sync_playwright() as p:
-        browser=p.chromium.launch(headless=True)
+        browser=p.chromium.launch(headless=True,args=['--disable-http2'])
         try:
             context=browser.new_context(java_script_enabled=True)
             http=BrowserHTTP(context)
-            print('BROWSER_TEST_STARTED: Standard Chromium; normal JavaScript and resources; no keys, login, security changes or Sheet writes.',flush=True)
+            print('BROWSER_TEST_STARTED: Standard Chromium; HTTP/2 disabled for this isolated test; HTTPS certificate validation unchanged; no keys or Sheet writes.',flush=True)
             html=http.get('https://www.noon.com/uae-en/'+sku+'/p/')
             print('DOCUMENT_RECEIVED:',len(html),'characters',flush=True)
             product=extract(html,'product');result=primary(product,sku,seller)
